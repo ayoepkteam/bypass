@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Ruijie Bypass tool v2 - Unlocked Edition
+Ruijie Bypass tool v2 - With Key Approval System
 Pro Terminal Edition
 """
 
@@ -19,6 +19,119 @@ from urllib.parse import urlparse, parse_qs, urljoin
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # ===============================
+# KEY APPROVAL SYSTEM
+# ===============================
+
+# Colors for approval
+black = "\033[0;30m"
+red = "\033[0;31m"
+bred = "\033[1;31m"
+green = "\033[0;32m"
+bgreen = "\033[1;32m"
+yellow = "\033[0;33m"
+byellow = "\033[1;33m"
+blue = "\033[0;34m"
+bblue = "\033[1;34m"
+purple = "\033[0;35m"
+bpurple = "\033[1;35m"
+cyan = "\033[0;36m"
+bcyan = "\033[1;36m"
+white = "\033[0;37m"
+reset = "\033[00m"
+
+# Google Sheets CSV URL
+SHEET_ID = "1_RIPqzWzynf_88KemuAExCwbSrMlUsUp2KYus11EiAI"
+SHEET_CSV_URL = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=csv&gid=0"
+
+# Local cache for offline approval
+LOCAL_KEYS_FILE = os.path.expanduser("~/.turbo_approved_keys.txt")
+
+def get_system_key():
+    """Get unique system key for this device"""
+    try:
+        uid = os.geteuid()
+    except AttributeError:
+        uid = 1000
+    try:
+        username = os.getlogin()
+    except:
+        username = os.environ.get('USER', 'unknown')
+    return f"{uid}{username}"
+
+def fetch_authorized_keys():
+    """Fetch authorized keys from Google Sheets"""
+    keys = []
+    
+    # Try Google Sheets first
+    try:
+        response = requests.get(SHEET_CSV_URL, timeout=10)
+        if response.status_code == 200:
+            for line in response.text.strip().split('\n'):
+                line = line.strip()
+                if line and not line.startswith('username') and not line.startswith('key'):
+                    key = line.split(',')[0].strip().strip('"')
+                    if key:
+                        keys.append(key)
+            
+            # Save to local cache
+            if keys:
+                try:
+                    with open(LOCAL_KEYS_FILE, 'w') as f:
+                        f.write('\n'.join(keys))
+                except:
+                    pass
+            return keys
+    except:
+        pass
+    
+    # Try local cache
+    try:
+        if os.path.exists(LOCAL_KEYS_FILE):
+            with open(LOCAL_KEYS_FILE, 'r') as f:
+                keys = [line.strip() for line in f if line.strip()]
+            return keys
+    except:
+        pass
+    
+    return keys
+
+def check_approval():
+    """Check if system key is approved"""
+    print(f"{bcyan}╔══════════════════════════════════════════════════════════════════╗")
+    print(f"║                    KEY APPROVAL SYSTEM                               ║")
+    print(f"╚══════════════════════════════════════════════════════════════════╝{reset}")
+    print(f"\n{bcyan}[!] Checking approval status...{reset}")
+    
+    system_key = get_system_key()
+    authorized_keys = fetch_authorized_keys()
+    
+    print(f"{white}[*] System Key: {system_key}{reset}")
+    print(f"{white}[*] Authorized Keys: {len(authorized_keys)}{reset}")
+    
+    if system_key in authorized_keys:
+        print(f"\n{bgreen}╔══════════════════════════════════════════════════════════════════╗")
+        print(f"║                    ✓ KEY APPROVED ✓                                 ║")
+        print(f"║                    Bypass Tool  Unlocked                            ║")
+        print(f"╚══════════════════════════════════════════════════════════════════╝{reset}")
+        time.sleep(1.5)
+        return True
+    else:
+        print(f"\n{bred}╔══════════════════════════════════════════════════════════════════╗")
+        print(f"║                    ❌ KEY NOT APPROVED ❌                           ║")
+        print(f"╠══════════════════════════════════════════════════════════════════╣")
+        print(f"║                                                                  ║")
+        print(f"║  {yellow}To buy this tool, contact:{reset}                                 ║")
+        print(f"║                                                                  ║")
+        print(f"║     {bcyan} Telegram:{reset}  @ayoe8888                                     ║")
+        print(f"║     {bcyan}Channel:{reset}  @pkteampkt                                ║")
+        print(f"║                                                                  ║")
+        print(f"║  {yellow}Your Key: {system_key}{reset}                                             ║")
+        print(f"║  {yellow}Send this key to buy the tool{reset}                                        ║")
+        print(f"║                                                                  ║")
+        print(f"╚══════════════════════════════════════════════════════════════════╝{reset}")
+        return False
+
+# ===============================
 # CONFIG
 # ===============================
 PING_THREADS = 5
@@ -26,15 +139,15 @@ MIN_INTERVAL = 0.05
 MAX_INTERVAL = 0.2
 DEBUG = False
 
-# Colors for UI
-red = "\033[0;31m"
-green = "\033[0;32m"
-yellow = "\033[0;33m"
-cyan = "\033[0;36m"
-purple = "\033[0;35m"
-reset = "\033[00m"
-
-RED, GREEN, CYAN, YELLOW, MAGENTA, RESET = red, green, cyan, yellow, purple, reset
+# ===============================
+# COLOR SYSTEM (Hacker UI) - Merge with approval colors
+# ===============================
+RED = red
+GREEN = green
+CYAN = cyan
+YELLOW = yellow
+MAGENTA = purple
+RESET = reset
 
 # ===============================
 # LOGGING
@@ -62,9 +175,9 @@ def check_real_internet():
 def banner():
     print(f"""{MAGENTA}
 ╔══════════════════════════════════════╗
-║        Ruijie Bypass Tool v2         ║
-║        Use Termux Apk                ║
-║        {GREEN}STATUS: UNLOCKED ✓{MAGENTA}            ║
+║        Ruijie Bypass Tool v2      ║
+║        Use Termux Apk         ║
+║        {GREEN}KEY APPROVED ✓{MAGENTA}                       ║
 ╚══════════════════════════════════════╝
 {RESET}""")
 
@@ -84,6 +197,7 @@ def high_speed_ping(auth_link, sid):
             ping_count += 1
             success_count += 1
             
+            # Color based on latency
             if elapsed < 50:
                 color = GREEN
             elif elapsed < 100:
@@ -93,9 +207,15 @@ def high_speed_ping(auth_link, sid):
             
             print(f"{color}[✓]{RESET} SID {sid} | Ping: {elapsed:.1f}ms | Success: {success_count}/{ping_count}", end="\r")
             
-        except Exception:
+        except requests.exceptions.Timeout:
+            ping_count += 1
+            print(f"{RED}[X]{RESET} SID {sid} | TIMEOUT | Success: {success_count}/{ping_count}", end="\r")
+        except requests.exceptions.ConnectionError:
             ping_count += 1
             print(f"{RED}[X]{RESET} SID {sid} | Connection Lost | Success: {success_count}/{ping_count}", end="\r")
+        except Exception as e:
+            if DEBUG:
+                print(f"{RED}[!]{RESET} Error: {e}", end="\r")
         
         time.sleep(random.uniform(MIN_INTERVAL, MAX_INTERVAL))
 
@@ -107,6 +227,10 @@ def start_process():
     os.system('clear' if os.name == 'posix' else 'cls')
     banner()
     logging.info(f"{CYAN}Initializing Turbo Engine...{RESET}")
+    
+    # Show network status
+    print(f"\n{CYAN}[*] Network Status:{RESET}")
+    print(f"    Checking internet connectivity...")
     
     if check_real_internet():
         print(f"    {GREEN}[✓] Internet is already active{RESET}")
@@ -120,6 +244,7 @@ def start_process():
         try:
             r = requests.get(test_url, allow_redirects=True, timeout=5)
 
+            # Check if already connected
             if r.url == test_url:
                 if check_real_internet():
                     print(f"{YELLOW}[•]{RESET} Internet Already Active... Waiting     ", end="\r")
@@ -151,6 +276,20 @@ def start_process():
 
             print(f"{GREEN}[✓]{RESET} Session ID Captured: {sid}")
 
+            # STEP 2 - Optional Voucher Test
+            print(f"{CYAN}[*] Checking Voucher Endpoint...{RESET}")
+            voucher_api = f"{portal_host}/api/auth/voucher/"
+
+            try:
+                v_res = session.post(
+                    voucher_api,
+                    json={'accessCode': '123456', 'sessionId': sid, 'apiVersion': 1},
+                    timeout=5
+                )
+                print(f"{GREEN}[✓]{RESET} Voucher API Status: {v_res.status_code}")
+            except:
+                print(f"{YELLOW}[!]{RESET} Voucher Endpoint Skipped")
+
             # STEP 3 - Build Auth Link
             params = parse_qs(parsed_portal.query)
             gw_addr = params.get('gw_address', ['192.168.60.1'])[0]
@@ -162,6 +301,8 @@ def start_process():
             print(f"{CYAN}[*] Target: {gw_addr}:{gw_port}{RESET}")
             print(f"{YELLOW}[!] Press Ctrl+C to stop{RESET}\n")
 
+            # Start ping threads
+            threads = []
             for i in range(PING_THREADS):
                 t = threading.Thread(
                     target=high_speed_ping,
@@ -169,10 +310,13 @@ def start_process():
                     daemon=True
                 )
                 t.start()
+                threads.append(t)
 
+            # Monitor internet connection
             last_status = False
             while not stop_event.is_set():
                 is_connected = check_real_internet()
+                
                 if is_connected and not last_status:
                     print(f"\n{GREEN}[✓] Internet Connected!{RESET}")
                 elif not is_connected and last_status:
@@ -189,12 +333,23 @@ def start_process():
             time.sleep(5)
 
 # ===============================
-# ENTRY POINT
+# ENTRY POINT WITH APPROVAL
 # ===============================
 if __name__ == "__main__":
-    try:
-        start_process()
-    except KeyboardInterrupt:
-        stop_event.set()
-        print(f"\n{RED}Turbo Engine Shutdown...{RESET}")
+    # Check for bypass mode (testing only)
+    
+    # Check for key display
+    if len(sys.argv) > 1 and sys.argv[1] == "--key":
+        print(f"\n{GREEN}Your System Key: {get_system_key()}{RESET}")
+        print(f"{YELLOW}Send this key to @ayoe8888 to purchase{RESET}")
         sys.exit(0)
+    
+    # Normal mode with approval check
+    if check_approval():
+        try:
+            start_process()
+        except KeyboardInterrupt:
+            stop_event.set()
+            print(f"\n{RED}Turbo Engine Shutdown...{RESET}")
+    else:
+        sys.exit(1)
