@@ -182,7 +182,7 @@ def start_process():
             gw_addr = params.get('gw_address', ['192.168.110.1'])[0]
             gw_port = params.get('gw_port', ['2060'])[0]
 
-            auth_link = f"http://{gw_addr}:{gw_port}/wifidog/auth?token={sid}&phonenumber=12345"
+            auth_link = f"http://{gw_addr}:{gw_port}/wifidog/auth?token={sid}&phonenumber=pkt12"
 
             print(f"{MAGENTA}[*] Launching {PING_THREADS} Turbo Threads...{RESET}")
             print(f"{CYAN}[*] Target: {gw_addr}:{gw_port}{RESET}")
